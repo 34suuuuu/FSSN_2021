@@ -1,16 +1,19 @@
-import pygame  # 1. pygame 선언
+import pygame
 from datetime import datetime
 from datetime import timedelta
-
+from pygame import mixer
+import random
 # pylint: disable=no-member
 
-pygame.init()  # 2. pygame 초기화
+# Initialize pygame
+pygame.init()
 pygame.display.set_caption('SNAKE GAME')
 
-# 3. pygame에 사용되는 전역변수 선언
+# global
 WHITE = (255, 255, 255)
 RED = (255, 0, 0)
 GREEN = (0, 255, 0)
+BLACK = (0, 0, 0)
 size = [600, 600]
 screen = pygame.display.set_mode(size)
 
@@ -25,7 +28,13 @@ KEY_DIRECTION = {
     pygame.K_RIGHT: 'E',
 }
 
-# 뱀 길이 = 20
+# background music
+
+
+def music_stop():
+    pygame.mixer.music.stop()
+
+
 def draw_block(screen, color, position):
     block = pygame.Rect((position[0] * 20, position[1] * 20),
                         (20, 20))
@@ -34,7 +43,7 @@ def draw_block(screen, color, position):
 
 class Snake:
     def __init__(self):
-        self.positions = [(2, 0), (1, 0), (0, 0)]  # 뱀의 위치, (2,0이 머리)
+        self.positions = [(2, 0), (1, 0), (0, 0)]  # head - tail
         self.direction = ''
 
     def draw(self):
@@ -44,30 +53,40 @@ class Snake:
     def move(self):
         head_position = self.positions[0]
         y, x = head_position
-        if self.direction == 'N':
+        if self.direction == 'W':
             self.positions = [(y - 1, x)] + self.positions[:-1]
-        elif self.direction == 'S':
-            self.positions = [(y + 1, x)] + self.positions[:-1]
-        elif self.direction == 'W':
-            self.positions = [(y, x - 1)] + self.positions[:-1]
         elif self.direction == 'E':
+            self.positions = [(y + 1, x)] + self.positions[:-1]
+        elif self.direction == 'N':
+            self.positions = [(y, x - 1)] + self.positions[:-1]
+        elif self.direction == 'S':
             self.positions = [(y, x + 1)] + self.positions[:-1]
+
+    def eat(self):
+        tail_position = self.positions[-1]
+        x, y = tail_position
+        if self.direction == 'W':
+            self.positions.append((x, y-1))
+        if self.direction == 'E':
+            self.positions.append((x, y+1))
+        if self.direction == 'N':
+            self.positions.append((x-1, y))
+        if self.direction == 'S':
+            self.positions.append((x+1, y))
 
 
 class Apple:
-    def __init__(self, position=(5, 5)):
+    def __init__(self):
+        position = (random.randrange(0, 25), random.randrange(0, 25))
         self.position = position
 
     def draw(self):
         draw_block(screen, RED, self.position)
 
 
-# 4. pygame 무한루프
-
-
 def runGame():
     global done, last_moved_time
-    # 게임 시작 시, 뱀과 사과를 초기화
+    # Initialize Snake, Apple
     snake = Snake()
     apple = Apple()
 
@@ -82,7 +101,7 @@ def runGame():
                 if event.key in KEY_DIRECTION:
                     snake.direction = KEY_DIRECTION[event.key]
 
-# 내가 한거
+# keyboard
         # for event in pygame.event.get():
         #     if event.type == pygame.KEYDOWN:
         #         y, x = snake.positions[0]
@@ -99,9 +118,11 @@ def runGame():
             snake.move()
 
         if snake.positions[0] == apple.position:
+            snake.eat()
+            apple.position = (random.randrange(0, 25), random.randrange(0, 25))
 
-            print("collision ")
-            print(snake.positions[0])
+        if snake.positions[0] == snake.positions[-1]:
+            pygame.quit()
 
         snake.draw()
         apple.draw()
