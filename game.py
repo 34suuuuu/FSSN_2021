@@ -89,6 +89,7 @@ def runGame():
     # Initialize Snake, Apple
     snake = Snake()
     apple = Apple()
+    apple2 = Apple()
 
     while not done:
         clock.tick(10)
@@ -101,31 +102,24 @@ def runGame():
                 if event.key in KEY_DIRECTION:
                     snake.direction = KEY_DIRECTION[event.key]
 
-# keyboard
-        # for event in pygame.event.get():
-        #     if event.type == pygame.KEYDOWN:
-        #         y, x = snake.positions[0]
-        #         if event.type == pygame.K_LEFT:
-        #             x += 1
-        #         elif event.type == pygame.K_RIGHT:
-        #             x -= 1
-        #         elif event.type == pygame.K_UP:
-        #             y -= 2
-        #         elif event.type == pygame.K_DOWN:
-        #             y += 2
-
         if timedelta(seconds=0.5) <= datetime.now() - last_moved_time:
             snake.move()
 
         if snake.positions[0] == apple.position:
             snake.eat()
-            apple.position = (random.randrange(0, 25), random.randrange(0, 25))
+            apple.position = (random.randrange(0, 25), random.randrange(0, 12))
+
+        if snake.positions[0] == apple2.position:
+            snake.eat()
+            apple2.position = (random.randrange(
+                0, 25), random.randrange(12, 25))
 
         if snake.positions[0] == snake.positions[-1]:
             pygame.quit()
 
         snake.draw()
         apple.draw()
+        apple2.draw
         pygame.display.update()
 
 
